@@ -1,0 +1,32 @@
+@startuml
+!include <C4/C4_Context>
+
+' Палитра исходных диаграмм MediaLAB: без изменения оформления
+skinparam backgroundColor #121212
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontColor #E6E6E6
+skinparam titleFontColor #E6E6E6
+skinparam shadowing false
+LAYOUT_LANDSCAPE()
+
+UpdateElementStyle("person", $bgColor="#95C4F2", $fontColor="#111111", $borderColor="#95C4F2")
+UpdateElementStyle("system", $bgColor="#69AEF2", $fontColor="#111111", $borderColor="#69AEF2")
+UpdateElementStyle("external_system", $bgColor="#7E7787", $fontColor="#111111", $borderColor="#7E7787")
+UpdateRelStyle($lineColor="#AFAFAF", $textColor="#D8D8D8")
+
+title MediaLAB — C1. Контекст системы
+
+Person(admin, "Администратор MediaLAB", "Рассматривает заявки и ведёт учёт оборудования")
+System(medialab, "Система бронирования и учёта техники MediaLAB", "Обеспечивает бронирование, выдачу, возврат и историю использования")
+System_Ext(telegram, "Telegram", "Внешняя платформа обмена сообщениями")
+Person(student, "Студент MediaLAB", "Просматривает каталог и оформляет бронирование")
+
+BiRel(admin, medialab, "Рассматривает заявки и получает сведения", "Веб-интерфейс / HTTPS")
+BiRel(medialab, telegram, "Получает команды и отправляет уведомления", "Telegram Bot API / HTTPS")
+BiRel(telegram, student, "Команды, ответы и уведомления", "Telegram")
+
+Lay_R(admin, medialab)
+Lay_R(medialab, telegram)
+Lay_R(telegram, student)
+
+@enduml

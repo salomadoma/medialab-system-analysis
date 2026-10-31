@@ -1,0 +1,55 @@
+@startuml
+!include <C4/C4_Container>
+
+' Палитра исходных диаграмм MediaLAB: без изменения оформления
+skinparam backgroundColor #121212
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontColor #E6E6E6
+skinparam titleFontColor #E6E6E6
+skinparam shadowing false
+LAYOUT_LANDSCAPE()
+
+UpdateElementStyle("person", $bgColor="#95C4F2", $fontColor="#111111", $borderColor="#95C4F2")
+UpdateElementStyle("external_system", $bgColor="#7E7787", $fontColor="#111111", $borderColor="#7E7787")
+UpdateElementStyle("container", $bgColor="#1D8EB9", $fontColor="#111111", $borderColor="#1D8EB9")
+UpdateBoundaryStyle("system", $bgColor="#121212", $fontColor="#E6E6E6", $borderColor="#727272")
+UpdateRelStyle($lineColor="#AFAFAF", $textColor="#D8D8D8")
+
+title MediaLAB — C2. Контейнеры системы
+
+Person(student, "Студент MediaLAB", "Бронирует технику через Telegram")
+Person(admin, "Администратор MediaLAB", "Работает с заявками через веб-панель")
+System_Ext(telegram, "Telegram", "Внешняя платформа обмена сообщениями")
+
+System_Boundary(medialab, "Система бронирования и учёта техники MediaLAB") {
+    Container(bot, "Telegram-бот", "Python / aiogram", "Принимает команды, показывает каталог и статусы заявок")
+    Container(panel, "Панель администратора", "Веб-приложение", "Позволяет рассматривать заявки и учитывать выдачу и возврат")
+    Container(api, "Серверная часть", "Python / FastAPI", "Проверяет доступность и выполняет операции с бронированиями")
+    ContainerDb(db, "База данных", "PostgreSQL", "Хранит пользователей, технику, заявки и историю действий")
+    Container(worker, "Фоновый обработчик", "Python / Celery", "Проверяет сроки возврата и фиксирует просрочки")
+    ContainerDb(queue, "Очередь задач", "Redis", "Хранит задания до их обработки")
+    ContainerDb(files, "Файловое хранилище", "Объектное хранилище", "Хранит фотографии состояния техники и акты")
+}
+
+BiRel(student, telegram, "Отправляет команды; получает ответы", "Telegram")
+BiRel(telegram, bot, "Передаёт обновления и сообщения", "Telegram Bot API / HTTPS")
+BiRel(admin, panel, "Передаёт решения; просматривает заявки", "Браузер / HTTPS")
+BiRel(bot, api, "Передаёт команды; получает данные", "REST / HTTPS / JSON")
+BiRel(panel, api, "Передаёт решения; получает данные", "REST / HTTPS / JSON")
+Rel(api, db, "Читает и сохраняет данные", "SQL")
+Rel(api, queue, "Отправляет задания", "Celery / Redis")
+Rel(worker, queue, "Получает задания", "Celery / Redis")
+Rel(worker, api, "Запускает служебную проверку сроков", "HTTPS / JSON")
+BiRel(api, files, "Сохраняет и получает файлы", "API хранилища")
+
+Lay_R(student, telegram)
+Lay_D(student, admin)
+Lay_R(telegram, bot)
+Lay_D(bot, panel)
+Lay_R(bot, api)
+Lay_R(api, db)
+Lay_D(api, worker)
+Lay_D(worker, queue)
+Lay_D(db, files)
+
+@enduml

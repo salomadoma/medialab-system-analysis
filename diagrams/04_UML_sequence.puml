@@ -1,0 +1,68 @@
+@startuml
+skinparam backgroundColor #121212
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontColor #E6E6E6
+skinparam titleFontColor #E6E6E6
+skinparam shadowing false
+skinparam ArrowColor #AFAFAF
+skinparam SequenceLifeLineBorderColor #7E7787
+skinparam SequenceLifeLineBackgroundColor #121212
+skinparam SequenceParticipantBorderColor #95C4F2
+skinparam SequenceParticipantBackgroundColor #95C4F2
+skinparam SequenceParticipantFontColor #111111
+skinparam SequenceActorBorderColor #95C4F2
+skinparam SequenceActorFontColor #E6E6E6
+skinparam SequenceGroupBorderColor #7E7787
+skinparam SequenceGroupBackgroundColor #1C1C1C
+skinparam SequenceGroupFontColor #E6E6E6
+skinparam SequenceBoxBorderColor #7E7787
+skinparam SequenceMessageFontColor #E6E6E6
+skinparam NoteBackgroundColor #7E7787
+skinparam NoteBorderColor #7E7787
+skinparam NoteFontColor #111111
+
+title MediaLAB — UML. Создание заявки на бронирование
+
+autonumber
+actor "Студент" as S
+participant "Telegram-бот" as B
+participant "Серверная часть\n(FastAPI)" as API
+database "База данных" as DB
+
+S -> B : Выбирает технику, период и цель
+B -> API : POST /bookings\nДанные заявки, X-Actor-Id
+activate API
+API -> API : Проверяет заполнение полей и период
+
+alt Данные некорректны
+  API --> B : 422 — ошибка проверки данных
+  B --> S : Предлагает исправить заявку
+else Данные корректны
+  API -> DB : Начинает транзакцию и проверяет роль
+  DB --> API : Сведения о пользователе
+  API -> DB : Проверяет состояние техники,\nлимит заявок и просрочки
+  DB --> API : Результат проверок
+  API -> DB : Проверяет пересечения периодов\nс действующими заявками
+  DB --> API : Результат проверки
+
+  alt Есть конфликт или ограничение
+    API -> DB : Отменяет транзакцию
+    API --> B : 403 / 409 — причина отказа
+    B --> S : Показывает причину отказа
+  else Проверки пройдены
+    API -> DB : Сохраняет заявку (pending)\nи событие создания (created)
+    API -> DB : Завершает транзакцию
+    DB --> API : Номер и данные заявки
+    API --> B : 201 — заявка создана
+    B --> S : Показывает номер и статус заявки
+  end
+end
+
+deactivate API
+
+note over B,API
+  Диаграмма описывает целевое взаимодействие.
+  В учебном прототипе запрос к API выполняется
+  напрямую, без работающего Telegram-бота.
+end note
+@enduml

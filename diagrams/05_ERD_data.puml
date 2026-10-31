@@ -1,0 +1,78 @@
+@startuml
+skinparam backgroundColor #121212
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontColor #E6E6E6
+skinparam titleFontColor #E6E6E6
+skinparam shadowing false
+skinparam linetype ortho
+skinparam ArrowColor #AFAFAF
+skinparam entity {
+  BackgroundColor #1D8EB9
+  BorderColor #1D8EB9
+  FontColor #111111
+}
+skinparam class {
+  BackgroundColor #1D8EB9
+  BorderColor #1D8EB9
+  FontColor #111111
+}
+hide circle
+
+title MediaLAB — ERD. Сущности базы данных
+
+entity "Пользователи\n(users)" as U {
+  * id : TEXT <<PK>>
+  --
+  * role : TEXT
+}
+
+entity "Оборудование\n(equipment)" as E {
+  * id : INTEGER <<PK>>
+  --
+  * name : TEXT
+  * category : TEXT
+  * description : TEXT
+  * condition : TEXT
+}
+
+entity "Бронирования\n(bookings)" as B {
+  * id : INTEGER <<PK>>
+  --
+  * student_id : TEXT <<FK>>
+  * equipment_id : INTEGER <<FK>>
+  * start_at : TEXT
+  * end_at : TEXT
+  * purpose : TEXT
+  * status : TEXT
+  * created_at : TEXT
+  review_comment : TEXT
+  return_condition : TEXT
+  issued_at : TEXT
+  returned_at : TEXT
+}
+
+entity "История действий\n(booking_events)" as H {
+  * id : INTEGER <<PK>>
+  --
+  * booking_id : INTEGER <<FK>>
+  * actor_id : TEXT
+  * action : TEXT
+  * at : TEXT
+  note : TEXT
+}
+
+U ||--o{ B : оформляет
+E ||--o{ B : используется в
+B ||--o{ H : имеет записи
+
+note bottom of H
+  Поле actor_id не связано внешним ключом
+  с таблицей пользователей: действие может
+  зафиксировать планировщик (scheduler).
+end note
+
+legend bottom
+  PK — первичный ключ; FK — внешний ключ.
+  Время хранится в UTC; необязательные поля допускают NULL.
+endlegend
+@enduml

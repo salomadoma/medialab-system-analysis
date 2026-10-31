@@ -1,0 +1,771 @@
+openapi: 3.1.0
+info:
+  title: MediaLAB Equipment Booking API
+  description: 'Учебный прототип системы бронирования техники. Тестовые акторы: `student-1`,
+    `student-2`, `admin-1` через заголовок `X-Actor-Id`. **Важно:** заголовок не является
+    безопасной аутентификацией. Telegram-бот и веб-панель описаны в концепции, но
+    не входят в этот API-прототип.'
+  version: 1.0.0
+paths:
+  /equipment:
+    get:
+      tags:
+      - Equipment
+      summary: Получить каталог техники
+      operationId: list_equipment_equipment_get
+      parameters:
+      - name: start_at
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Start At
+      - name: end_at
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: End At
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EquipmentOut'
+                title: Response List Equipment Equipment Get
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /equipment/{equipment_id}:
+    get:
+      tags:
+      - Equipment
+      summary: Получить информацию об оборудовании
+      operationId: equipment_detail_equipment__equipment_id__get
+      parameters:
+      - name: equipment_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Equipment Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EquipmentOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bookings:
+    post:
+      tags:
+      - Bookings
+      summary: Создать заявку на бронирование
+      description: Проверяет лимит, просрочки и пересечение периодов в одной транзакции.
+      operationId: create_booking_bookings_post
+      parameters:
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Bookings
+      summary: Получить список заявок (свои или все для администратора)
+      operationId: list_bookings_bookings_get
+      parameters:
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookingOut'
+                title: Response List Bookings Bookings Get
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bookings/{booking_id}:
+    get:
+      tags:
+      - Bookings
+      summary: Просмотреть заявку
+      operationId: booking_detail_bookings__booking_id__get
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Booking Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    patch:
+      tags:
+      - Bookings
+      summary: Исправить ожидающую уточнения заявку
+      operationId: update_booking_bookings__booking_id__patch
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Booking Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bookings/{booking_id}/cancel:
+    post:
+      tags:
+      - Bookings
+      summary: Отменить заявку до выдачи
+      operationId: cancel_booking_bookings__booking_id__cancel_post
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Booking Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bookings/{booking_id}/decision:
+    post:
+      tags:
+      - Administration
+      summary: Рассмотреть заявку
+      operationId: decide_bookings__booking_id__decision_post
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Booking Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecisionRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bookings/{booking_id}/issue:
+    post:
+      tags:
+      - Administration
+      summary: Зафиксировать выдачу техники
+      operationId: issue_bookings__booking_id__issue_post
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Booking Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /bookings/{booking_id}/return:
+    post:
+      tags:
+      - Administration
+      summary: Зафиксировать возврат и состояние техники
+      operationId: return_equipment_bookings__booking_id__return_post
+      parameters:
+      - name: booking_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Booking Id
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReturnRequest'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /admin/jobs/overdue-check:
+    post:
+      tags:
+      - Administration
+      summary: Запустить проверку просрочек вручную (имитация планировщика)
+      operationId: overdue_check_admin_jobs_overdue_check_post
+      parameters:
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobOut'
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /admin/events:
+    get:
+      tags:
+      - Administration
+      summary: Получить журнал операций
+      operationId: events_admin_events_get
+      parameters:
+      - name: X-Actor-Id
+        in: header
+        required: true
+        schema:
+          type: string
+          title: X-Actor-Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventOut'
+                title: Response Events Admin Events Get
+        '401':
+          description: Неизвестный пользователь (демо-идентификация)
+        '403':
+          description: Недостаточно прав или бизнес-ограничение
+        '404':
+          description: Ресурс не найден или недоступен текущему пользователю
+        '409':
+          description: Конфликт состояния или интервалов бронирования
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    BookingCreate:
+      properties:
+        equipment_id:
+          type: integer
+          minimum: 1.0
+          title: Equipment Id
+        start_at:
+          type: string
+          format: date-time
+          title: Start At
+        end_at:
+          type: string
+          format: date-time
+          title: End At
+        purpose:
+          type: string
+          maxLength: 300
+          minLength: 5
+          title: Purpose
+      type: object
+      required:
+      - equipment_id
+      - start_at
+      - end_at
+      - purpose
+      title: BookingCreate
+    BookingOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        student_id:
+          type: string
+          title: Student Id
+        equipment_id:
+          type: integer
+          title: Equipment Id
+        start_at:
+          type: string
+          title: Start At
+        end_at:
+          type: string
+          title: End At
+        purpose:
+          type: string
+          title: Purpose
+        status:
+          type: string
+          title: Status
+        review_comment:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Review Comment
+        return_condition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Return Condition
+        created_at:
+          type: string
+          title: Created At
+        issued_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Issued At
+        returned_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Returned At
+      type: object
+      required:
+      - id
+      - student_id
+      - equipment_id
+      - start_at
+      - end_at
+      - purpose
+      - status
+      - created_at
+      title: BookingOut
+    BookingUpdate:
+      properties:
+        start_at:
+          type: string
+          format: date-time
+          title: Start At
+        end_at:
+          type: string
+          format: date-time
+          title: End At
+        purpose:
+          type: string
+          maxLength: 300
+          minLength: 5
+          title: Purpose
+      type: object
+      required:
+      - start_at
+      - end_at
+      - purpose
+      title: BookingUpdate
+    DecisionRequest:
+      properties:
+        decision:
+          type: string
+          enum:
+          - approve
+          - reject
+          - needs_info
+          title: Decision
+        comment:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+          title: Comment
+      type: object
+      required:
+      - decision
+      title: DecisionRequest
+    EquipmentOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        name:
+          type: string
+          title: Name
+        category:
+          type: string
+          title: Category
+        description:
+          type: string
+          title: Description
+        condition:
+          type: string
+          title: Condition
+        available_now:
+          type: boolean
+          title: Available Now
+        available_for_period:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Available For Period
+      type: object
+      required:
+      - id
+      - name
+      - category
+      - description
+      - condition
+      - available_now
+      title: EquipmentOut
+    EventOut:
+      properties:
+        id:
+          type: integer
+          title: Id
+        booking_id:
+          type: integer
+          title: Booking Id
+        actor_id:
+          type: string
+          title: Actor Id
+        action:
+          type: string
+          title: Action
+        at:
+          type: string
+          title: At
+        note:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Note
+      type: object
+      required:
+      - id
+      - booking_id
+      - actor_id
+      - action
+      - at
+      title: EventOut
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    JobOut:
+      properties:
+        checked:
+          type: integer
+          title: Checked
+        newly_overdue:
+          type: integer
+          title: Newly Overdue
+      type: object
+      required:
+      - checked
+      - newly_overdue
+      title: JobOut
+    ReturnRequest:
+      properties:
+        condition:
+          type: string
+          enum:
+          - good
+          - damaged
+          title: Condition
+        comment:
+          anyOf:
+          - type: string
+            maxLength: 500
+          - type: 'null'
+          title: Comment
+      type: object
+      required:
+      - condition
+      title: ReturnRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+tags:
+- name: Equipment
+  description: Каталог и доступность на период
+- name: Bookings
+  description: Заявки студентов
+- name: Administration
+  description: Решения и физический учет

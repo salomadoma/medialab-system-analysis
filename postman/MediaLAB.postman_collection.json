@@ -1,0 +1,434 @@
+{
+  "info": {
+    "name": "MediaLAB — проверка учебного API (12 запросов)",
+    "description": "Коллекция для локально запущенного FastAPI. Запустите python -m uvicorn api.main:app --reload. Идентификаторы акторов: student-1 и admin-1. Для дат используется автоматическая подстановка UTC. Запустите POST /bookings первым: его ответ сохранит booking_id. Для выдачи требуется статус approved и начало периода не далее чем через 15 минут. Коллекция не является сервером и не заменяет запуск API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /equipment — Получить каталог техники",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/equipment",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "equipment"
+          ],
+          "query": [
+            {
+              "key": "start_at",
+              "value": "2026-11-10T10:00:00",
+              "disabled": true
+            },
+            {
+              "key": "end_at",
+              "value": "2026-11-10T14:00:00",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "GET /equipment/{equipment_id} — Получить информацию об оборудовании",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/equipment/{{equipment_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "equipment",
+            "{{equipment_id}}"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /bookings — Создать заявку на бронирование",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"equipment_id\": {{equipment_id}},\n  \"start_at\": \"{{start_at}}\",\n  \"end_at\": \"{{end_at}}\",\n  \"purpose\": \"Съемка студенческого проекта\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Заявка создана (201)\", function () { pm.response.to.have.status(201); });",
+              "if (pm.response.code === 201) {",
+              "  pm.collectionVariables.set(\"booking_id\", pm.response.json().id);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "GET /bookings — Получить список заявок (свои или все для администратора)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "GET /bookings/{booking_id} — Просмотреть заявку",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings/{{booking_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings",
+            "{{booking_id}}"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH /bookings/{booking_id} — Исправить ожидающую уточнения заявку",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings/{{booking_id}}",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings",
+            "{{booking_id}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"start_at\": \"{{start_at}}\",\n  \"end_at\": \"{{end_at}}\",\n  \"purpose\": \"Съемка учебного фильма\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /bookings/{booking_id}/cancel — Отменить заявку до выдачи",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{student_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings/{{booking_id}}/cancel",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings",
+            "{{booking_id}}",
+            "cancel"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /bookings/{booking_id}/decision — Рассмотреть заявку",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{admin_id}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings/{{booking_id}}/decision",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings",
+            "{{booking_id}}",
+            "decision"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"decision\": \"approve\",\n  \"comment\": \"Одобрено\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /bookings/{booking_id}/issue — Зафиксировать выдачу техники",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{admin_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings/{{booking_id}}/issue",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings",
+            "{{booking_id}}",
+            "issue"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /bookings/{booking_id}/return — Зафиксировать возврат и состояние техники",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{admin_id}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/bookings/{{booking_id}}/return",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "bookings",
+            "{{booking_id}}",
+            "return"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"condition\": \"good\",\n  \"comment\": \"Комплект исправен\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "POST /admin/jobs/overdue-check — Запустить проверку просрочек вручную (имитация планировщика)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{admin_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/admin/jobs/overdue-check",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "admin",
+            "jobs",
+            "overdue-check"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    },
+    {
+      "name": "GET /admin/events — Получить журнал операций",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Actor-Id",
+            "value": "{{admin_id}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/admin/events",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "admin",
+            "events"
+          ]
+        },
+        "description": "Для работы нужен запущенный локальный API; код и описание — в README."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "student_id",
+      "value": "student-1"
+    },
+    {
+      "key": "admin_id",
+      "value": "admin-1"
+    },
+    {
+      "key": "booking_id",
+      "value": "1"
+    },
+    {
+      "key": "equipment_id",
+      "value": "1"
+    },
+    {
+      "key": "start_at",
+      "value": ""
+    },
+    {
+      "key": "end_at",
+      "value": ""
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Даты в ближайшем будущем; время в UTC с указанием пояса Z.",
+          "const start = new Date(Date.now() + 10 * 60 * 1000);",
+          "const end = new Date(start.getTime() + 2 * 60 * 60 * 1000);",
+          "pm.collectionVariables.set(\"start_at\", start.toISOString());",
+          "pm.collectionVariables.set(\"end_at\", end.toISOString());"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+@startuml
+skinparam backgroundColor #121212
+skinparam defaultFontName "DejaVu Sans"
+skinparam defaultFontColor #E6E6E6
+skinparam titleFontColor #E6E6E6
+skinparam shadowing false
+skinparam ArrowColor #AFAFAF
+skinparam ArrowFontColor #D8D8D8
+skinparam state {
+  BackgroundColor #1D8EB9
+  BorderColor #1D8EB9
+  FontColor #111111
+  StartColor #95C4F2
+  EndColor #95C4F2
+}
+hide empty description
+
+title MediaLAB — UML. Диаграмма состояний заявки
+
+state "На рассмотрении\n(pending)" as P
+state "Требует уточнения\n(needs_info)" as N
+state "Подтверждена\n(approved)" as A
+state "Отклонена\n(rejected)" as R
+state "Отменена\n(cancelled)" as C
+state "Выдана\n(issued)" as I
+state "Просрочена\n(overdue)" as O
+state "Возвращена\n(returned)" as V
+
+[*] --> P : Студент создал заявку
+
+P --> N : Администратор запросил уточнение
+N --> P : Студент исправил заявку
+P --> P : Студент изменил заявку
+N --> N : Администратор повторил запрос уточнения
+
+P --> A : Администратор подтвердил\n[техника доступна]
+P --> R : Администратор отклонил
+N --> R : Администратор отклонил
+
+P --> C : Студент отменил
+N --> C : Студент отменил
+A --> C : Студент отменил до выдачи
+
+A --> I : Администратор зафиксировал выдачу\n[не ранее чем за 15 минут до начала]
+I --> O : Проверка выявила просрочку\n[срок возврата истёк]
+I --> V : Администратор зафиксировал возврат
+O --> V : Администратор зафиксировал возврат
+
+R --> [*]
+C --> [*]
+V --> [*]
+@enduml
